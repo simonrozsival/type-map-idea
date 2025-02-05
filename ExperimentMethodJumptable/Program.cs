@@ -301,6 +301,28 @@ class TypeMapping
             throw new ArgumentException($"Unknown Java class name: {javaClassName}");
         }
 
+        // IL_002c: ldloc.0
+        // IL_002d: switch (IL_00db, IL_00eb, IL_00fb, IL_010b, IL_011b, IL_012b, IL_013b, IL_014b, IL_015b, IL_016b, IL_017b, IL_018b, IL_019b, IL_01ab, IL_01bb, IL_01cb, IL_01db, IL_01eb, IL_01fb, IL_020b, IL_021b, IL_022b, IL_023b, IL_024b, IL_025b, IL_026b, IL_027b, IL_028b, IL_029b, IL_02ab, IL_02bb, IL_02cb, IL_02d8, IL_02e5, IL_02f2, IL_02ff, IL_030c, IL_0319, IL_0326, IL_0333, IL_0340)
+        //
+        // IL_00d6: br IL_0348
+        //
+        // IL_00db: ldtoken JavaClass0
+        // IL_00e0: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
+        // IL_00e5: stloc.2
+        // IL_00e6: br IL_0353
+        //
+        // IL_00eb: ldtoken JavaClass1
+        // IL_00f0: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
+        // IL_00f5: stloc.2
+        // IL_00f6: br IL_0353
+        //
+        // IL_00fb: ldtoken JavaClass2
+        // IL_0100: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
+        // IL_0105: stloc.2
+        // IL_0106: br IL_0353
+        //
+        // ...
+
         return index switch
         {
             // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
