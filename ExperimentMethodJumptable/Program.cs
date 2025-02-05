@@ -1,7 +1,7 @@
 ﻿using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
 
-// Idea: Using IL to store typerefs and memberrefs for efficient loading of types and method delegates.
+// Idea: Using method bodies to store typerefs and memberrefs for efficient loading of types and method delegates.
 //       We just build a large method(*) which can return any of the types or method delegates and create a jumptable
 //       to jump to exactly to the right place - using a switch statement with cases being sequential numbers.
 //       To map the class names to the consecutive numbers [0-N) we use a pre-compiled frozen dictionary.
@@ -21,8 +21,7 @@ using System.Runtime.CompilerServices;
 {
     // 1. method map
     var map = new MethodMapping(new byte[0]);
-    var factory = map.GetMethod("JavaClass33");
-    var ptr = factory(42);
+    var ptr = map.Invoke_GetFunctionPointer("JavaClass33", 42);
     Console.WriteLine(ptr); // 3 * 42 = 126
 }
 
@@ -93,7 +92,7 @@ class MethodMapping
         }.ToFrozenDictionary();
     }
 
-    public Func<int, IntPtr> GetMethod(string javaClassName)
+    public IntPtr Invoke_GetFunctionPointer(string javaClassName, int arg)
     {
         // Could this method get too big to jit? --- https://github.com/xamarin/xamarin-macios/blob/main/docs/managed-static-registrar.md#method-mapping
         // how could we represent this method as a hash table?
@@ -108,53 +107,26 @@ class MethodMapping
         // - BUT if this method is generated _after_ trimming then there won't be any gaps
         //   and it can be a simple jump table
         // - we can do the bucketing 2 level (or even multiple levels) nested jumptables as described in the xamarin-macios doc
-
+        //
         // IL_002c: ldloc.0
-        // IL_002d: switch (IL_00d7, IL_00f8, IL_0119, IL_013a, IL_015b, IL_017c, IL_019d, IL_01be, IL_01df, IL_0200, IL_0221, IL_0242, IL_0263, IL_0284, IL_02a5, IL_02c6, IL_02e7, IL_0308, IL_0329, IL_034a, IL_036b, IL_038c, IL_03ad, IL_03ce, IL_03ef, IL_0410, IL_0431, IL_0452, IL_0473, IL_0494, IL_04b5, IL_04d6, IL_04f7, IL_0518, IL_0539, IL_055a, IL_057b, IL_0599, IL_05b7, IL_05d5)
+        // IL_002d: switch (IL_00db, IL_00e7, IL_00f3, IL_00ff, IL_010b, IL_0117, IL_0123, IL_012f, IL_013b, IL_0147, IL_0153, IL_015f, IL_016b, IL_0177, IL_0183, IL_018f, IL_019b, IL_01a7, IL_01b3, IL_01bf, IL_01cb, IL_01d7, IL_01e3, IL_01ef, IL_01fb, IL_0207, IL_0213, IL_021f, IL_022b, IL_0234, IL_023d, IL_0246, IL_024f, IL_0258, IL_0261, IL_026a, IL_0273, IL_027c, IL_0285, IL_028e, IL_0297)
         //
-        // IL_00d2: br IL_05f3
+        // IL_00d6: br IL_02a0
         //
-        // IL_00d7: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
-        // IL_00dc: dup
-        // IL_00dd: brtrue.s IL_00f2
+        // IL_00db: ldarg.2
+        // IL_00dc: call native int JavaClass0::GetFunctionPointer(int32)
+        // IL_00e1: stloc.2
+        // IL_00e2: br IL_02ab
         //
-        // IL_00df: pop
-        // IL_00e0: ldnull
-        // IL_00e1: ldftn native int JavaClass0::GetFunctionPointer(int32)
-        // IL_00e7: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-        // IL_00ec: dup
-        // IL_00ed: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
+        // IL_00e7: ldarg.2
+        // IL_00e8: call native int JavaClass1::GetFunctionPointer(int32)
+        // IL_00ed: stloc.2
+        // IL_00ee: br IL_02ab
         //
-        // IL_00f2: stloc.2
-        // IL_00f3: br IL_05fe
-        //
-        // IL_00f8: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
-        // IL_00fd: dup
-        // IL_00fe: brtrue.s IL_0113
-        //
-        // IL_0100: pop
-        // IL_0101: ldnull
-        // IL_0102: ldftn native int JavaClass1::GetFunctionPointer(int32)
-        // IL_0108: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-        // IL_010d: dup
-        // IL_010e: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
-        //
-        // IL_0113: stloc.2
-        // IL_0114: br IL_05fe
-        //
-        // IL_0119: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
-        // IL_011e: dup
-        // IL_011f: brtrue.s IL_0134
-        //
-        // IL_0121: pop
-        // IL_0122: ldnull
-        // IL_0123: ldftn native int JavaClass2::GetFunctionPointer(int32)
-        // IL_0129: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-        // IL_012e: dup
-        // IL_012f: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
-        //
-        // IL_0134: stloc.2
-        // IL_0135: br IL_05fe
+        // IL_00f3: ldarg.2
+        // IL_00f4: call native int JavaClass2::GetFunctionPointer(int32)
+        // IL_00f9: stloc.2
+        // IL_00fa: br IL_02ab
         //
         // ...
 
@@ -162,48 +134,48 @@ class MethodMapping
         {
             // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
             // how do I test that?
-            0 => JavaClass0.GetFunctionPointer,
-            1 => JavaClass1.GetFunctionPointer,
-            2 => JavaClass2.GetFunctionPointer,
-            3 => JavaClass3.GetFunctionPointer,
-            4 => JavaClass4.GetFunctionPointer,
-            5 => JavaClass5.GetFunctionPointer,
-            6 => JavaClass6.GetFunctionPointer,
-            7 => JavaClass7.GetFunctionPointer,
-            8 => JavaClass8.GetFunctionPointer,
-            9 => JavaClass9.GetFunctionPointer,
-            10 => JavaClass10.GetFunctionPointer,
-            11 => JavaClass11.GetFunctionPointer,
-            12 => JavaClass12.GetFunctionPointer,
-            13 => JavaClass13.GetFunctionPointer,
-            14 => JavaClass14.GetFunctionPointer,
-            15 => JavaClass15.GetFunctionPointer,
-            16 => JavaClass16.GetFunctionPointer,
-            17 => JavaClass17.GetFunctionPointer,
-            18 => JavaClass18.GetFunctionPointer,
-            19 => JavaClass19.GetFunctionPointer,
-            20 => JavaClass20.GetFunctionPointer,
-            21 => JavaClass21.GetFunctionPointer,
-            22 => JavaClass22.GetFunctionPointer,
-            23 => JavaClass23.GetFunctionPointer,
-            24 => JavaClass24.GetFunctionPointer,
-            25 => JavaClass25.GetFunctionPointer,
-            26 => JavaClass26.GetFunctionPointer,
-            27 => JavaClass27.GetFunctionPointer,
-            28 => JavaClass28.GetFunctionPointer,
-            29 => JavaClass29.GetFunctionPointer,
-            30 => JavaClass30.GetFunctionPointer,
-            31 => JavaClass31.GetFunctionPointer,
-            32 => JavaClass32.GetFunctionPointer,
-            33 => JavaClass33.GetFunctionPointer,
-            34 => JavaClass34.GetFunctionPointer,
-            35 => JavaClass35.GetFunctionPointer,
-            36 => JavaClass36.GetFunctionPointer,
-            37 => JavaClass37.GetFunctionPointer,
-            38 => JavaClass38.GetFunctionPointer,
-            39 => JavaClass39.GetFunctionPointer,
-            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.GetFunctionPointer, // --- second assembly module initializer ran!
-            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_GetFunctionPointer(), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
+            0 => JavaClass0.GetFunctionPointer(arg),
+            1 => JavaClass1.GetFunctionPointer(arg),
+            2 => JavaClass2.GetFunctionPointer(arg),
+            3 => JavaClass3.GetFunctionPointer(arg),
+            4 => JavaClass4.GetFunctionPointer(arg),
+            5 => JavaClass5.GetFunctionPointer(arg),
+            6 => JavaClass6.GetFunctionPointer(arg),
+            7 => JavaClass7.GetFunctionPointer(arg),
+            8 => JavaClass8.GetFunctionPointer(arg),
+            9 => JavaClass9.GetFunctionPointer(arg),
+            10 => JavaClass10.GetFunctionPointer(arg),
+            11 => JavaClass11.GetFunctionPointer(arg),
+            12 => JavaClass12.GetFunctionPointer(arg),
+            13 => JavaClass13.GetFunctionPointer(arg),
+            14 => JavaClass14.GetFunctionPointer(arg),
+            15 => JavaClass15.GetFunctionPointer(arg),
+            16 => JavaClass16.GetFunctionPointer(arg),
+            17 => JavaClass17.GetFunctionPointer(arg),
+            18 => JavaClass18.GetFunctionPointer(arg),
+            19 => JavaClass19.GetFunctionPointer(arg),
+            20 => JavaClass20.GetFunctionPointer(arg),
+            21 => JavaClass21.GetFunctionPointer(arg),
+            22 => JavaClass22.GetFunctionPointer(arg),
+            23 => JavaClass23.GetFunctionPointer(arg),
+            24 => JavaClass24.GetFunctionPointer(arg),
+            25 => JavaClass25.GetFunctionPointer(arg),
+            26 => JavaClass26.GetFunctionPointer(arg),
+            27 => JavaClass27.GetFunctionPointer(arg),
+            28 => JavaClass28.GetFunctionPointer(arg),
+            29 => JavaClass29.GetFunctionPointer(arg),
+            30 => JavaClass30.GetFunctionPointer(arg),
+            31 => JavaClass31.GetFunctionPointer(arg),
+            32 => JavaClass32.GetFunctionPointer(arg),
+            33 => JavaClass33.GetFunctionPointer(arg),
+            34 => JavaClass34.GetFunctionPointer(arg),
+            35 => JavaClass35.GetFunctionPointer(arg),
+            36 => JavaClass36.GetFunctionPointer(arg),
+            37 => JavaClass37.GetFunctionPointer(arg),
+            38 => JavaClass38.GetFunctionPointer(arg),
+            39 => JavaClass39.GetFunctionPointer(arg),
+            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.GetFunctionPointer(arg), // --- second assembly module initializer ran!
+            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_GetFunctionPointer(arg), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
             _ => throw new ArgumentOutOfRangeException(nameof(index))
         };
 
@@ -258,8 +230,8 @@ class MethodMapping
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)] // -- this is necessary for R2R to skip loading the other assembly unless the type is actually requested
-    private static Func<int, IntPtr> Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_GetFunctionPointer()
-        => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.GetFunctionPointer;
+    private static IntPtr Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_GetFunctionPointer(int arg)
+        => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.GetFunctionPointer(arg);
 }
 
 class TypeMapping
