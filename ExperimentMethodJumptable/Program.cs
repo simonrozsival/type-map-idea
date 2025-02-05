@@ -109,51 +109,51 @@ class MethodMapping
         // - we can do the bucketing 2 level (or even multiple levels) nested jumptables as described in the xamarin-macios doc
 
         // IL_002c: ldloc.0
-		// IL_002d: switch (IL_00d7, IL_00f8, IL_0119, IL_013a, IL_015b, IL_017c, IL_019d, IL_01be, IL_01df, IL_0200, IL_0221, IL_0242, IL_0263, IL_0284, IL_02a5, IL_02c6, IL_02e7, IL_0308, IL_0329, IL_034a, IL_036b, IL_038c, IL_03ad, IL_03ce, IL_03ef, IL_0410, IL_0431, IL_0452, IL_0473, IL_0494, IL_04b5, IL_04d6, IL_04f7, IL_0518, IL_0539, IL_055a, IL_057b, IL_0599, IL_05b7, IL_05d5)
+        // IL_002d: switch (IL_00d7, IL_00f8, IL_0119, IL_013a, IL_015b, IL_017c, IL_019d, IL_01be, IL_01df, IL_0200, IL_0221, IL_0242, IL_0263, IL_0284, IL_02a5, IL_02c6, IL_02e7, IL_0308, IL_0329, IL_034a, IL_036b, IL_038c, IL_03ad, IL_03ce, IL_03ef, IL_0410, IL_0431, IL_0452, IL_0473, IL_0494, IL_04b5, IL_04d6, IL_04f7, IL_0518, IL_0539, IL_055a, IL_057b, IL_0599, IL_05b7, IL_05d5)
         //
-		// IL_00d2: br IL_05f3
+        // IL_00d2: br IL_05f3
         //
-		// IL_00d7: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
-		// IL_00dc: dup
-		// IL_00dd: brtrue.s IL_00f2
+        // IL_00d7: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
+        // IL_00dc: dup
+        // IL_00dd: brtrue.s IL_00f2
         //
-		// IL_00df: pop
-		// IL_00e0: ldnull
-		// IL_00e1: ldftn native int JavaClass0::GetFunctionPointer(int32)
-		// IL_00e7: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-		// IL_00ec: dup
-		// IL_00ed: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
+        // IL_00df: pop
+        // IL_00e0: ldnull
+        // IL_00e1: ldftn native int JavaClass0::GetFunctionPointer(int32)
+        // IL_00e7: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
+        // IL_00ec: dup
+        // IL_00ed: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<0>__GetFunctionPointer'
         //
-		// IL_00f2: stloc.2
-		// IL_00f3: br IL_05fe
+        // IL_00f2: stloc.2
+        // IL_00f3: br IL_05fe
         //
-		// IL_00f8: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
-		// IL_00fd: dup
-		// IL_00fe: brtrue.s IL_0113
+        // IL_00f8: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
+        // IL_00fd: dup
+        // IL_00fe: brtrue.s IL_0113
         //
-		// IL_0100: pop
-		// IL_0101: ldnull
-		// IL_0102: ldftn native int JavaClass1::GetFunctionPointer(int32)
-		// IL_0108: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-		// IL_010d: dup
-		// IL_010e: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
+        // IL_0100: pop
+        // IL_0101: ldnull
+        // IL_0102: ldftn native int JavaClass1::GetFunctionPointer(int32)
+        // IL_0108: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
+        // IL_010d: dup
+        // IL_010e: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<1>__GetFunctionPointer'
         //
-		// IL_0113: stloc.2
-		// IL_0114: br IL_05fe
+        // IL_0113: stloc.2
+        // IL_0114: br IL_05fe
         //
-		// IL_0119: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
-		// IL_011e: dup
-		// IL_011f: brtrue.s IL_0134
+        // IL_0119: ldsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
+        // IL_011e: dup
+        // IL_011f: brtrue.s IL_0134
         //
-		// IL_0121: pop
-		// IL_0122: ldnull
-		// IL_0123: ldftn native int JavaClass2::GetFunctionPointer(int32)
-		// IL_0129: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
-		// IL_012e: dup
-		// IL_012f: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
+        // IL_0121: pop
+        // IL_0122: ldnull
+        // IL_0123: ldftn native int JavaClass2::GetFunctionPointer(int32)
+        // IL_0129: newobj instance void class [System.Runtime]System.Func`2<int32, native int>::.ctor(object, native int)
+        // IL_012e: dup
+        // IL_012f: stsfld class [System.Runtime]System.Func`2<int32, native int> MethodMapping/'<>O'::'<2>__GetFunctionPointer'
         //
-		// IL_0134: stloc.2
-		// IL_0135: br IL_05fe
+        // IL_0134: stloc.2
+        // IL_0135: br IL_05fe
         //
         // ...
 
