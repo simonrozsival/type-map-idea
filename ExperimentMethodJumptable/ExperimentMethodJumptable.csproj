@@ -7,10 +7,14 @@
     <Nullable>enable</Nullable>
     <!-- <PublishAot>true</PublishAot> -->
     <PublishReadyToRun>true</PublishReadyToRun>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ExperimentMethodJumptable_SecondAssembly\ExperimentMethodJumptable_SecondAssembly.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.IO.Hashing" Version="9.0.1" />
+  </ItemGroup>
 </Project>
