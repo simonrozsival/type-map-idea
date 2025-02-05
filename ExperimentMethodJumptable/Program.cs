@@ -5,7 +5,8 @@ using System.Runtime.CompilerServices;
 //       We just build a large method(*) which can return any of the types or method delegates and create a jumptable
 //       to jump to exactly to the right place - using a switch statement with cases being sequential numbers.
 //       To map the class names to the consecutive numbers [0-N) we use a pre-compiled frozen dictionary.
-//      
+//
+//   - the lookup tables and the frozen dictionary need to be generated & precompiled after trimming
 //   - works with all platforms and runtimes - including AOT and R2R
 //   - the final code is AOT and trim safe
 //   - it avoid loading types from other assemblies via one extra level of indirection (works also for R2R)
