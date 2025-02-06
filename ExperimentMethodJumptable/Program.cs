@@ -185,48 +185,48 @@ class MethodMapping
         {
             // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
             // how do I test that?
-            0 => JavaClass0.MyMethod(vtableSlot),
-            1 => JavaClass1.MyMethod(vtableSlot),
-            2 => JavaClass2.MyMethod(vtableSlot),
-            3 => JavaClass3.MyMethod(vtableSlot),
-            4 => JavaClass4.MyMethod(vtableSlot),
-            5 => JavaClass5.MyMethod(vtableSlot),
-            6 => JavaClass6.MyMethod(vtableSlot),
-            7 => JavaClass7.MyMethod(vtableSlot),
-            8 => JavaClass8.MyMethod(vtableSlot),
-            9 => JavaClass9.MyMethod(vtableSlot),
-            10 => JavaClass10.MyMethod(vtableSlot),
-            11 => JavaClass11.MyMethod(vtableSlot),
-            12 => JavaClass12.MyMethod(vtableSlot),
-            13 => JavaClass13.MyMethod(vtableSlot),
-            14 => JavaClass14.MyMethod(vtableSlot),
-            15 => JavaClass15.MyMethod(vtableSlot),
-            16 => JavaClass16.MyMethod(vtableSlot),
-            17 => JavaClass17.MyMethod(vtableSlot),
-            18 => JavaClass18.MyMethod(vtableSlot),
-            19 => JavaClass19.MyMethod(vtableSlot),
-            20 => JavaClass20.MyMethod(vtableSlot),
-            21 => JavaClass21.MyMethod(vtableSlot),
-            22 => JavaClass22.MyMethod(vtableSlot),
-            23 => JavaClass23.MyMethod(vtableSlot),
-            24 => JavaClass24.MyMethod(vtableSlot),
-            25 => JavaClass25.MyMethod(vtableSlot),
-            26 => JavaClass26.MyMethod(vtableSlot),
-            27 => JavaClass27.MyMethod(vtableSlot),
-            28 => JavaClass28.MyMethod(vtableSlot),
-            29 => JavaClass29.MyMethod(vtableSlot),
-            30 => JavaClass30.MyMethod(vtableSlot),
-            31 => JavaClass31.MyMethod(vtableSlot),
-            32 => JavaClass32.MyMethod(vtableSlot),
-            33 => JavaClass33.MyMethod(vtableSlot),
-            34 => JavaClass34.MyMethod(vtableSlot),
-            35 => JavaClass35.MyMethod(vtableSlot),
-            36 => JavaClass36.MyMethod(vtableSlot),
-            37 => JavaClass37.MyMethod(vtableSlot),
-            38 => JavaClass38.MyMethod(vtableSlot),
-            39 => JavaClass39.MyMethod(vtableSlot),
-            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.MyMethod(arg), // --- second assembly module initializer ran!
-            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_MyMethod(vtableSlot), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
+            0 => Class0.MyMethod(vtableSlot),
+            1 => Class1.MyMethod(vtableSlot),
+            2 => Class2.MyMethod(vtableSlot),
+            3 => Class3.MyMethod(vtableSlot),
+            4 => Class4.MyMethod(vtableSlot),
+            5 => Class5.MyMethod(vtableSlot),
+            6 => Class6.MyMethod(vtableSlot),
+            7 => Class7.MyMethod(vtableSlot),
+            8 => Class8.MyMethod(vtableSlot),
+            9 => Class9.MyMethod(vtableSlot),
+            10 => Class10.MyMethod(vtableSlot),
+            11 => Class11.MyMethod(vtableSlot),
+            12 => Class12.MyMethod(vtableSlot),
+            13 => Class13.MyMethod(vtableSlot),
+            14 => Class14.MyMethod(vtableSlot),
+            15 => Class15.MyMethod(vtableSlot),
+            16 => Class16.MyMethod(vtableSlot),
+            17 => Class17.MyMethod(vtableSlot),
+            18 => Class18.MyMethod(vtableSlot),
+            19 => Class19.MyMethod(vtableSlot),
+            20 => Class20.MyMethod(vtableSlot),
+            21 => Class21.MyMethod(vtableSlot),
+            22 => Class22.MyMethod(vtableSlot),
+            23 => Class23.MyMethod(vtableSlot),
+            24 => Class24.MyMethod(vtableSlot),
+            25 => Class25.MyMethod(vtableSlot),
+            26 => Class26.MyMethod(vtableSlot),
+            27 => Class27.MyMethod(vtableSlot),
+            28 => Class28.MyMethod(vtableSlot),
+            29 => Class29.MyMethod(vtableSlot),
+            30 => Class30.MyMethod(vtableSlot),
+            31 => Class31.MyMethod(vtableSlot),
+            32 => Class32.MyMethod(vtableSlot),
+            33 => Class33.MyMethod(vtableSlot),
+            34 => Class34.MyMethod(vtableSlot),
+            35 => Class35.MyMethod(vtableSlot),
+            36 => Class36.MyMethod(vtableSlot),
+            37 => Class37.MyMethod(vtableSlot),
+            38 => Class38.MyMethod(vtableSlot),
+            39 => Class39.MyMethod(vtableSlot),
+            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherClass1.MyMethod(arg), // --- second assembly module initializer ran!
+            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_MyMethod(vtableSlot), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
             _ => throw new ArgumentOutOfRangeException(nameof(index))
         };
 
@@ -281,8 +281,8 @@ class MethodMapping
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)] // -- this is necessary for R2R to skip loading the other assembly unless the type is actually requested
-    private static IntPtr Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1_MyMethod(int arg)
-        => ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1.MyMethod(arg);
+    private static IntPtr Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_MyMethod(int arg)
+        => ExperimentMethodJumptable_SecondAssembly.OtherClass1.MyMethod(arg);
 }
 
 class TypeMapping
@@ -358,17 +358,17 @@ class TypeMapping
         //
         // IL_00d6: br IL_0348
         //
-        // IL_00db: ldtoken JavaClass0
+        // IL_00db: ldtoken Class0
         // IL_00e0: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
         // IL_00e5: stloc.2
         // IL_00e6: br IL_0353
         //
-        // IL_00eb: ldtoken JavaClass1
+        // IL_00eb: ldtoken Class1
         // IL_00f0: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
         // IL_00f5: stloc.2
         // IL_00f6: br IL_0353
         //
-        // IL_00fb: ldtoken JavaClass2
+        // IL_00fb: ldtoken Class2
         // IL_0100: call class [System.Runtime]System.Type [System.Runtime]System.Type::GetTypeFromHandle(valuetype [System.Runtime]System.RuntimeTypeHandle)
         // IL_0105: stloc.2
         // IL_0106: br IL_0353
@@ -379,72 +379,72 @@ class TypeMapping
         {
             // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
             // how do I test that?
-            0 => typeof(JavaClass0),
-            1 => typeof(JavaClass1),
-            2 => typeof(JavaClass2),
-            3 => typeof(JavaClass3),
-            4 => typeof(JavaClass4),
-            5 => typeof(JavaClass5),
-            6 => typeof(JavaClass6),
-            7 => typeof(JavaClass7),
-            8 => typeof(JavaClass8),
-            9 => typeof(JavaClass9),
-            10 => typeof(JavaClass10),
-            11 => typeof(JavaClass11),
-            12 => typeof(JavaClass12),
-            13 => typeof(JavaClass13),
-            14 => typeof(JavaClass14),
-            15 => typeof(JavaClass15),
-            16 => typeof(JavaClass16),
-            17 => typeof(JavaClass17),
-            18 => typeof(JavaClass18),
-            19 => typeof(JavaClass19),
-            20 => typeof(JavaClass20),
-            21 => typeof(JavaClass21),
-            22 => typeof(JavaClass22),
-            23 => typeof(JavaClass23),
-            24 => typeof(JavaClass24),
-            25 => typeof(JavaClass25),
-            26 => typeof(JavaClass26),
-            27 => typeof(JavaClass27),
-            28 => typeof(JavaClass28),
-            29 => typeof(JavaClass29),
-            30 => typeof(JavaClass30),
-            31 => typeof(JavaClass31),
-            32 => typeof(JavaClass32),
-            33 => typeof(JavaClass33),
-            34 => typeof(JavaClass34),
-            35 => typeof(JavaClass35),
-            36 => typeof(JavaClass36),
-            37 => typeof(JavaClass37),
-            38 => typeof(JavaClass38),
-            39 => typeof(JavaClass39),
+            0 => typeof(Class0),
+            1 => typeof(Class1),
+            2 => typeof(Class2),
+            3 => typeof(Class3),
+            4 => typeof(Class4),
+            5 => typeof(Class5),
+            6 => typeof(Class6),
+            7 => typeof(Class7),
+            8 => typeof(Class8),
+            9 => typeof(Class9),
+            10 => typeof(Class10),
+            11 => typeof(Class11),
+            12 => typeof(Class12),
+            13 => typeof(Class13),
+            14 => typeof(Class14),
+            15 => typeof(Class15),
+            16 => typeof(Class16),
+            17 => typeof(Class17),
+            18 => typeof(Class18),
+            19 => typeof(Class19),
+            20 => typeof(Class20),
+            21 => typeof(Class21),
+            22 => typeof(Class22),
+            23 => typeof(Class23),
+            24 => typeof(Class24),
+            25 => typeof(Class25),
+            26 => typeof(Class26),
+            27 => typeof(Class27),
+            28 => typeof(Class28),
+            29 => typeof(Class29),
+            30 => typeof(Class30),
+            31 => typeof(Class31),
+            32 => typeof(Class32),
+            33 => typeof(Class33),
+            34 => typeof(Class34),
+            35 => typeof(Class35),
+            36 => typeof(Class36),
+            37 => typeof(Class37),
+            38 => typeof(Class38),
+            39 => typeof(Class39),
             // 40 => typeof(ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1), // --- second assembly module initializer ran!
-            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1(), // --- second assembly module initializer didn't run!
+            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1(), // --- second assembly module initializer didn't run!
             _ => throw new ArgumentOutOfRangeException(nameof(index))
         };
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)] // -- this is necessary for R2R to skip loading the other assembly unless the type is actually requested
-    private static Type Get_ExperimentMethodJumptable_SecondAssembly_OtherJavaClass1()
-        => typeof(ExperimentMethodJumptable_SecondAssembly.OtherJavaClass1);
+    private static Type Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1()
+        => typeof(ExperimentMethodJumptable_SecondAssembly.OtherClass1);
 }
 
-public class JavaClass0
+public class Class0
 {
-    static JavaClass0() => Console.WriteLine("JavaClass0 static ctor");
+    static Class0() => Console.WriteLine("Class0 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class JavaClass1
+public class Class1
 {
-    static JavaClass1() => Console.WriteLine("JavaClass1 static ctor");
+    static Class1() => Console.WriteLine("Class1 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class JavaClass2
+public class Class2
 {
-    static JavaClass2() => Console.WriteLine("JavaClass2 static ctor");
+    static Class2() => Console.WriteLine("Class2 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
     
     // public static IntPtr MyMethod(int arg)
@@ -454,225 +454,225 @@ public class JavaClass2
     //     }
 }
 
-public class JavaClass3
+public class Class3
 {
-    static JavaClass3() => Console.WriteLine("JavaClass3 static ctor");
+    static Class3() => Console.WriteLine("Class3 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class JavaClass4
+public class Class4
 {
-    static JavaClass4() => Console.WriteLine("JavaClass4 static ctor");
+    static Class4() => Console.WriteLine("Class4 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class JavaClass5
+public class Class5
 {
-    static JavaClass5() => Console.WriteLine("JavaClass5 static ctor");
+    static Class5() => Console.WriteLine("Class5 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class JavaClass6
+public class Class6
 {
-    static JavaClass6() => Console.WriteLine("JavaClass6 static ctor");
+    static Class6() => Console.WriteLine("Class6 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class JavaClass7
+public class Class7
 {
-    static JavaClass7() => Console.WriteLine("JavaClass7 static ctor");
+    static Class7() => Console.WriteLine("Class7 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class JavaClass8
+public class Class8
 {
-    static JavaClass8() => Console.WriteLine("JavaClass8 static ctor");
+    static Class8() => Console.WriteLine("Class8 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class JavaClass9
+public class Class9
 {
-    static JavaClass9() => Console.WriteLine("JavaClass9 static ctor");
+    static Class9() => Console.WriteLine("Class9 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
 
-public class JavaClass10
+public class Class10
 {
-    static JavaClass10() => Console.WriteLine("JavaClass10 static ctor");
+    static Class10() => Console.WriteLine("Class10 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class JavaClass11
+public class Class11
 {
-    static JavaClass11() => Console.WriteLine("JavaClass11 static ctor");
+    static Class11() => Console.WriteLine("Class11 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class JavaClass12
+public class Class12
 {
-    static JavaClass12() => Console.WriteLine("JavaClass12 static ctor");
+    static Class12() => Console.WriteLine("Class12 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class JavaClass13
+public class Class13
 {
-    static JavaClass13() => Console.WriteLine("JavaClass13 static ctor");
+    static Class13() => Console.WriteLine("Class13 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class JavaClass14
+public class Class14
 {
-    static JavaClass14() => Console.WriteLine("JavaClass14 static ctor");
+    static Class14() => Console.WriteLine("Class14 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class JavaClass15
+public class Class15
 {
-    static JavaClass15() => Console.WriteLine("JavaClass15 static ctor");
+    static Class15() => Console.WriteLine("Class15 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class JavaClass16
+public class Class16
 {
-    static JavaClass16() => Console.WriteLine("JavaClass16 static ctor");
+    static Class16() => Console.WriteLine("Class16 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class JavaClass17
+public class Class17
 {
-    static JavaClass17() => Console.WriteLine("JavaClass17 static ctor");
+    static Class17() => Console.WriteLine("Class17 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class JavaClass18
+public class Class18
 {
-    static JavaClass18() => Console.WriteLine("JavaClass18 static ctor");
+    static Class18() => Console.WriteLine("Class18 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class JavaClass19
+public class Class19
 {
-    static JavaClass19() => Console.WriteLine("JavaClass19 static ctor");
+    static Class19() => Console.WriteLine("Class19 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
-public class JavaClass20
+public class Class20
 {
-    static JavaClass20() => Console.WriteLine("JavaClass20 static ctor");
+    static Class20() => Console.WriteLine("Class20 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class JavaClass21
+public class Class21
 {
-    static JavaClass21() => Console.WriteLine("JavaClass21 static ctor");
+    static Class21() => Console.WriteLine("Class21 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class JavaClass22
+public class Class22
 {
-    static JavaClass22() => Console.WriteLine("JavaClass22 static ctor");
+    static Class22() => Console.WriteLine("Class22 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class JavaClass23
+public class Class23
 {
-    static JavaClass23() => Console.WriteLine("JavaClass23 static ctor");
+    static Class23() => Console.WriteLine("Class23 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class JavaClass24
+public class Class24
 {
-    static JavaClass24() => Console.WriteLine("JavaClass24 static ctor");
+    static Class24() => Console.WriteLine("Class24 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class JavaClass25
+public class Class25
 {
-    static JavaClass25() => Console.WriteLine("JavaClass25 static ctor");
+    static Class25() => Console.WriteLine("Class25 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class JavaClass26
+public class Class26
 {
-    static JavaClass26() => Console.WriteLine("JavaClass26 static ctor");
+    static Class26() => Console.WriteLine("Class26 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class JavaClass27
+public class Class27
 {
-    static JavaClass27() => Console.WriteLine("JavaClass27 static ctor");
+    static Class27() => Console.WriteLine("Class27 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class JavaClass28
+public class Class28
 {
-    static JavaClass28() => Console.WriteLine("JavaClass28 static ctor");
+    static Class28() => Console.WriteLine("Class28 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class JavaClass29
+public class Class29
 {
-    static JavaClass29() => Console.WriteLine("JavaClass29 static ctor");
+    static Class29() => Console.WriteLine("Class29 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
-public class JavaClass30
+public class Class30
 {
-    static JavaClass30() => Console.WriteLine("JavaClass30 static ctor");
+    static Class30() => Console.WriteLine("Class30 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class JavaClass31
+public class Class31
 {
-    static JavaClass31() => Console.WriteLine("JavaClass31 static ctor");
+    static Class31() => Console.WriteLine("Class31 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class JavaClass32
+public class Class32
 {
-    static JavaClass32() => Console.WriteLine("JavaClass32 static ctor");
+    static Class32() => Console.WriteLine("Class32 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class JavaClass33
+public class Class33
 {
-    static JavaClass33() => Console.WriteLine("JavaClass33 static ctor");
+    static Class33() => Console.WriteLine("Class33 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class JavaClass34
+public class Class34
 {
-    static JavaClass34() => Console.WriteLine("JavaClass34 static ctor");
+    static Class34() => Console.WriteLine("Class34 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class JavaClass35
+public class Class35
 {
-    static JavaClass35() => Console.WriteLine("JavaClass35 static ctor");
+    static Class35() => Console.WriteLine("Class35 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class JavaClass36
+public class Class36
 {
-    static JavaClass36() => Console.WriteLine("JavaClass36 static ctor");
+    static Class36() => Console.WriteLine("Class36 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class JavaClass37
+public class Class37
 {
-    static JavaClass37() => Console.WriteLine("JavaClass37 static ctor");
+    static Class37() => Console.WriteLine("Class37 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class JavaClass38
+public class Class38
 {
-    static JavaClass38() => Console.WriteLine("JavaClass38 static ctor");
+    static Class38() => Console.WriteLine("Class38 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class JavaClass39
+public class Class39
 {
-    static JavaClass39() => Console.WriteLine("JavaClass39 static ctor");
+    static Class39() => Console.WriteLine("Class39 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }

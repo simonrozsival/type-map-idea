@@ -11,8 +11,8 @@ static class Initializer
     }
 }
 
-public class OtherJavaClass1
+public class OtherClass1
 {
-    static OtherJavaClass1() => Console.WriteLine("OtherJavaClass1 static ctor");
-    public static IntPtr GetFunctionPointer(int arg) => arg * 2;
+    static OtherClass1() => Console.WriteLine("OtherClass1 static ctor");
+    public static IntPtr MyMethod(int arg) => arg * 2;
 }
