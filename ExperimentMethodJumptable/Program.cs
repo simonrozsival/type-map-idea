@@ -30,6 +30,15 @@ using System.Text;
     Console.WriteLine(ptr); // 3 * 42 = 126
 }
 
+{
+    // 1. type map
+    var map = new TypeMapping(new byte[0]);
+    
+    // we want to call ... JavaClass333.MyMethod(42); but we know just the Java class name so we have to do...
+    var type = map.GetType("JavaClass33"); 
+    Console.WriteLine(type); // "Class33"
+}
+
 unsafe
 {
     // Sorted values
