@@ -44,7 +44,10 @@ unsafe
     // Sorted values
     byte[][] values = ["JavaClass0"u8.ToArray(), "JavaClass1"u8.ToArray(), "JavaClass2"u8.ToArray(), "JavaClass3"u8.ToArray(), "JavaClass4"u8.ToArray(), "JavaClass5"u8.ToArray(), "JavaClass6"u8.ToArray(), "JavaClass7"u8.ToArray(), "JavaClass8"u8.ToArray(), "JavaClass9"u8.ToArray(), "JavaClass10"u8.ToArray(), "JavaClass11"u8.ToArray(), "JavaClass12"u8.ToArray(), "JavaClass13"u8.ToArray(), "JavaClass14"u8.ToArray(), "JavaClass15"u8.ToArray(), "JavaClass16"u8.ToArray(), "JavaClass17"u8.ToArray(), "JavaClass18"u8.ToArray(), "JavaClass19"u8.ToArray(), "JavaClass20"u8.ToArray(), "JavaClass21"u8.ToArray(), "JavaClass22"u8.ToArray(), "JavaClass23"u8.ToArray(), "JavaClass24"u8.ToArray(), "JavaClass25"u8.ToArray(), "JavaClass26"u8.ToArray(), "JavaClass27"u8.ToArray(), "JavaClass28"u8.ToArray(), "JavaClass29"u8.ToArray(), "JavaClass30"u8.ToArray(), "JavaClass31"u8.ToArray(), "JavaClass32"u8.ToArray(), "JavaClass33"u8.ToArray(), "JavaClass34"u8.ToArray(), "JavaClass35"u8.ToArray(), "JavaClass36"u8.ToArray(), "JavaClass37"u8.ToArray(), "JavaClass38"u8.ToArray(), "JavaClass39"u8.ToArray(), "OtherJavaClass1"u8.ToArray()];
 
-    var precompiledInfo = PrecompiledLookup.Compile(values);
+    // the precompiled info will tell us in which order the values are stored
+    // - they are just sorted so we can use binary search at the moment
+    // - but the order might be different if we actually encode the frozen dictionary there
+    var precompiledInfo = PrecompiledBinarySearchIndexLookup.Compile(values);
     var base64 = Convert.ToBase64String(precompiledInfo.RawBytes);
 
     Console.WriteLine($"Precompiled: {base64}");
@@ -52,21 +55,26 @@ unsafe
     // ----
 
     // byte[] rawBytes = Convert.FromBase64String(base64);
-    byte[] rawBytes = Convert.FromBase64String("KQAAAOEjBISK1BeFgEGkjEfJ7JRwGgWWYDYcm/O6A57VEN6kBvPKq0QKIq5BQy++8MQ1x8iYJc+fVyTR0ZdJ3J+o9dyhTSLhQUzv5PedSPpJ5TkJVriWI/6ZUScE0acuHvbVLrUeKDEUpFQ3QN5SOevFczl6jp4+ckO1ThGMyk640/5PpMYLU0j4Klu3Y3NcytAzZux4/WjJH0p1gWFmedqNo331VYl+AAAAAAoAAAAVAAAAIAAAACsAAAA2AAAAQQAAAEsAAABWAAAAYAAAAGsAAAB2AAAAgQAAAIwAAACWAAAAoQAAAKwAAAC3AAAAwQAAAMwAAADXAAAA4gAAAO0AAAD4AAAAAgEAABEBAAAbAQAAJgEAADABAAA6AQAARQEAAFABAABbAQAAZgEAAHABAAB7AQAAhgEAAJEBAACcAQAApwEAALIBAABKYXZhQ2xhc3MySmF2YUNsYXNzMThKYXZhQ2xhc3MxNUphdmFDbGFzczE2SmF2YUNsYXNzMzhKYXZhQ2xhc3MzNkphdmFDbGFzczdKYXZhQ2xhc3MzMUphdmFDbGFzczlKYXZhQ2xhc3MyN0phdmFDbGFzczExSmF2YUNsYXNzMjFKYXZhQ2xhc3MxMEphdmFDbGFzczRKYXZhQ2xhc3MzN0phdmFDbGFzczMwSmF2YUNsYXNzMjZKYXZhQ2xhc3M1SmF2YUNsYXNzMTJKYXZhQ2xhc3MzMkphdmFDbGFzczI5SmF2YUNsYXNzMzlKYXZhQ2xhc3MyNUphdmFDbGFzczFPdGhlckphdmFDbGFzczFKYXZhQ2xhc3MwSmF2YUNsYXNzMjJKYXZhQ2xhc3MzSmF2YUNsYXNzOEphdmFDbGFzczE0SmF2YUNsYXNzMjhKYXZhQ2xhc3MyMEphdmFDbGFzczE5SmF2YUNsYXNzNkphdmFDbGFzczM0SmF2YUNsYXNzMTdKYXZhQ2xhc3MxM0phdmFDbGFzczMzSmF2YUNsYXNzMzVKYXZhQ2xhc3MyM0phdmFDbGFzczI0");
+    
+    // I got this from the output of the previous run:
+    byte[] rawBytes = Convert.FromBase64String("KQAAABSkVDce9tUuyJglz0FDL773nUj67Hj9aHJDtU6AQaSMR8nslMrQM2aK1BeFpMYLU+EjBIS40/5P8MQ1x0DeUjnajaN99VWJfgTRpy6hTSLhRAoirhGMyk5WuJYj68VzOZ+o9dzVEN6kSeU5CckfSnW3Y3NcgWFmeWA2HJvRl0nccBoFlv6ZUSefVyTRQUzv5Ej4KlvzugOeeo6ePgbzyqu1HigxAAAAAAoAAAAUAAAAHwAAACoAAAA1AAAAQAAAAEsAAABWAAAAYQAAAGwAAAB3AAAAggAAAIwAAACXAAAAogAAAK0AAAC4AAAAwwAAAM4AAADZAAAA5AAAAO8AAAD6AAAABAEAAA8BAAAaAQAAJQEAADABAAA7AQAARgEAAFEBAABcAQAAZwEAAHIBAAB8AQAAhgEAAJABAACaAQAApAEAAK4BAABKYXZhQ2xhc3MwSmF2YUNsYXNzMUphdmFDbGFzczEwSmF2YUNsYXNzMTFKYXZhQ2xhc3MxMkphdmFDbGFzczEzSmF2YUNsYXNzMTRKYXZhQ2xhc3MxNUphdmFDbGFzczE2SmF2YUNsYXNzMTdKYXZhQ2xhc3MxOEphdmFDbGFzczE5SmF2YUNsYXNzMkphdmFDbGFzczIwSmF2YUNsYXNzMjFKYXZhQ2xhc3MyMkphdmFDbGFzczIzSmF2YUNsYXNzMjRKYXZhQ2xhc3MyNUphdmFDbGFzczI2SmF2YUNsYXNzMjdKYXZhQ2xhc3MyOEphdmFDbGFzczI5SmF2YUNsYXNzM0phdmFDbGFzczMwSmF2YUNsYXNzMzFKYXZhQ2xhc3MzMkphdmFDbGFzczMzSmF2YUNsYXNzMzRKYXZhQ2xhc3MzNUphdmFDbGFzczM2SmF2YUNsYXNzMzdKYXZhQ2xhc3MzOEphdmFDbGFzczM5SmF2YUNsYXNzNEphdmFDbGFzczVKYXZhQ2xhc3M2SmF2YUNsYXNzN0phdmFDbGFzczhKYXZhQ2xhc3M5T3RoZXJKYXZhQ2xhc3Mx");
+    // - this is just to show that the precompiled info is always stable
+    // - the precompiled Lookup can be used to generate some additional code where the indexes of those values can baked into something like a jumptable
 
     // make sure we don't cheat
     byte* nativeMemory = (byte*)NativeMemory.AllocZeroed((nuint)rawBytes.Length);
     NativeMemory.Copy(Unsafe.AsPointer(ref precompiledInfo.RawBytes[0]), nativeMemory, (nuint)rawBytes.Length);
 
-    var hydrated = new PrecompiledLookup(nativeMemory, rawBytes.Length);
+    var hydrated = new PrecompiledBinarySearchIndexLookup(nativeMemory, rawBytes.Length);
 
     int correct = 0;
     int incorrect = 0;
 
     foreach (var value in values)
     {
-        var expected = precompiledInfo.ValueIndexes[value];
-        var actual = hydrated.IndexOf(value);
+        var expected = precompiledInfo.Indexes[value];
+        var actual = hydrated[value];
+
         if (expected != actual)
         {
             Console.WriteLine($"\"{Encoding.UTF8.GetString(value)}\" => {actual} (expected {expected})");
@@ -78,7 +86,14 @@ unsafe
         }
     }
 
-    Console.WriteLine($"Correct: {correct}, Incorrect: {incorrect}");
+    if (incorrect == 0)
+    {
+        Console.WriteLine($"All {correct} values are correct");
+    }
+    else
+    {
+        Console.WriteLine($"Correct: {correct}, Incorrect: {incorrect}");
+    }
 }
 
 
@@ -439,19 +454,19 @@ class TypeMapping
         => typeof(ExperimentMethodJumptable_SecondAssembly.OtherClass1);
 }
 
-public class Class0
+public partial class Class0
 {
     static Class0() => Console.WriteLine("Class0 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class Class1
+public partial class Class1
 {
     static Class1() => Console.WriteLine("Class1 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class Class2
+public partial class Class2
 {
     static Class2() => Console.WriteLine("Class2 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
@@ -463,224 +478,224 @@ public class Class2
     //     }
 }
 
-public class Class3
+public partial class Class3
 {
     static Class3() => Console.WriteLine("Class3 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class Class4
+public partial class Class4
 {
     static Class4() => Console.WriteLine("Class4 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class Class5
+public partial class Class5
 {
     static Class5() => Console.WriteLine("Class5 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class Class6
+public partial class Class6
 {
     static Class6() => Console.WriteLine("Class6 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class Class7
+public partial class Class7
 {
     static Class7() => Console.WriteLine("Class7 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class Class8
+public partial class Class8
 {
     static Class8() => Console.WriteLine("Class8 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class Class9
+public partial class Class9
 {
     static Class9() => Console.WriteLine("Class9 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
 
-public class Class10
+public partial class Class10
 {
     static Class10() => Console.WriteLine("Class10 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class Class11
+public partial class Class11
 {
     static Class11() => Console.WriteLine("Class11 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class Class12
+public partial class Class12
 {
     static Class12() => Console.WriteLine("Class12 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class Class13
+public partial class Class13
 {
     static Class13() => Console.WriteLine("Class13 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class Class14
+public partial class Class14
 {
     static Class14() => Console.WriteLine("Class14 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class Class15
+public partial class Class15
 {
     static Class15() => Console.WriteLine("Class15 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class Class16
+public partial class Class16
 {
     static Class16() => Console.WriteLine("Class16 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class Class17
+public partial class Class17
 {
     static Class17() => Console.WriteLine("Class17 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class Class18
+public partial class Class18
 {
     static Class18() => Console.WriteLine("Class18 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class Class19
+public partial class Class19
 {
     static Class19() => Console.WriteLine("Class19 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
-public class Class20
+public partial class Class20
 {
     static Class20() => Console.WriteLine("Class20 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class Class21
+public partial class Class21
 {
     static Class21() => Console.WriteLine("Class21 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class Class22
+public partial class Class22
 {
     static Class22() => Console.WriteLine("Class22 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class Class23
+public partial class Class23
 {
     static Class23() => Console.WriteLine("Class23 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class Class24
+public partial class Class24
 {
     static Class24() => Console.WriteLine("Class24 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class Class25
+public partial class Class25
 {
     static Class25() => Console.WriteLine("Class25 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class Class26
+public partial class Class26
 {
     static Class26() => Console.WriteLine("Class26 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class Class27
+public partial class Class27
 {
     static Class27() => Console.WriteLine("Class27 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class Class28
+public partial class Class28
 {
     static Class28() => Console.WriteLine("Class28 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class Class29
+public partial class Class29
 {
     static Class29() => Console.WriteLine("Class29 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
 }
 
-public class Class30
+public partial class Class30
 {
     static Class30() => Console.WriteLine("Class30 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 0;
 }
 
-public class Class31
+public partial class Class31
 {
     static Class31() => Console.WriteLine("Class31 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 1;
 }
 
-public class Class32
+public partial class Class32
 {
     static Class32() => Console.WriteLine("Class32 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 2;
 }
 
-public class Class33
+public partial class Class33
 {
     static Class33() => Console.WriteLine("Class33 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 3;
 }
 
-public class Class34
+public partial class Class34
 {
     static Class34() => Console.WriteLine("Class34 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 4;
 }
 
-public class Class35
+public partial class Class35
 {
     static Class35() => Console.WriteLine("Class35 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 5;
 }
 
-public class Class36
+public partial class Class36
 {
     static Class36() => Console.WriteLine("Class36 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 6;
 }
 
-public class Class37
+public partial class Class37
 {
     static Class37() => Console.WriteLine("Class37 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 7;
 }
 
-public class Class38
+public partial class Class38
 {
     static Class38() => Console.WriteLine("Class38 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 8;
 }
 
-public class Class39
+public partial class Class39
 {
     static Class39() => Console.WriteLine("Class39 static ctor");
     public static IntPtr MyMethod(int arg) => arg * 9;
