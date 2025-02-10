@@ -89,7 +89,6 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
     public static PrecompiledInfo Compile(IEnumerable<byte[]> items)
     {
-        // ??? this ordering did not work as expected?
         var sortedValues = items.OrderBy(e => e, XxHash3Comparer.Instance).ToArray();
 
         List<byte> hashes = new();

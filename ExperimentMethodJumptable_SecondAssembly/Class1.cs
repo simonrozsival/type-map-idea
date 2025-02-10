@@ -16,5 +16,5 @@ static class Initializer
 public partial class OtherClass1
 {
     static OtherClass1() => Console.WriteLine("OtherClass1 static ctor");
-    public static IntPtr MyMethod(int arg) => arg * 2;
+    public static IntPtr MyMethod(int myArg) => myArg * 2000;
 }

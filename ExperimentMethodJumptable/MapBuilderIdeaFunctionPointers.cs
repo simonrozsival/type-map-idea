@@ -5,49 +5,46 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-internal partial class JavaInteropFunctionPointerMap : TypeMap<JavaInteropFunctionPointerMap, ReadOnlySpan<byte>>
+internal partial class JavaInteropFunctionPointerMap : TypeMap<Utf8BytesTypeMapKeyKind>
 {
     // What trimmer/ilc see:
     //
-    // // Methods
-    // .method private hidebysig static 
-    //     void BuildTypeMap (
-    //         class System.Runtime.InteropServices.TypeMapBuilder builder
-    //     ) cil managed 
-    // {
-    //     .custom instance void System.Runtime.InteropServices.TypeMapDefinition::.ctor() = (
-    //         01 00 00 00
-    //     )
-    //     // Method begins at RVA 0x2050
-    //     // Header size: 1
-    //     // Code size: 56 (0x38)
-    //     .maxstack 8
-    //
-    //     IL_0000: ldarg.0
-    //     IL_0001: ldsflda uint8[] JavaInteropFunctionPointerMap/JavaClassNames::Class0
-    //     IL_0006: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder::AddMapping<class Class0>(uint8[]& modreq([System.Runtime]System.Runtime.InteropServices.InAttribute))
-    //     IL_000b: ldarg.0
-    //     IL_000c: ldsflda uint8[] JavaInteropFunctionPointerMap/JavaClassNames::Class1
-    //     IL_0011: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder::AddMapping<class Class1>(uint8[]& modreq([System.Runtime]System.Runtime.InteropServices.InAttribute))
-    //     IL_0016: ldarg.0
-    //     IL_0017: ldsflda uint8[] JavaInteropFunctionPointerMap/JavaClassNames::Class2
-    //     IL_001c: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder::AddMapping<class Class2>(uint8[]& modreq([System.Runtime]System.Runtime.InteropServices.InAttribute))
-    //     IL_0021: ldarg.0
-    //     IL_0022: ldsflda uint8[] JavaInteropFunctionPointerMap/JavaClassNames::Class3
-    //     IL_0027: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder::AddMapping<class Class3>(uint8[]& modreq([System.Runtime]System.Runtime.InteropServices.InAttribute))
-    //     IL_002c: ldarg.0
-    //     IL_002d: ldsflda uint8[] JavaInteropFunctionPointerMap/JavaClassNames::Class4
-    //     IL_0032: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder::AddMapping<class Class4>(uint8[]& modreq([System.Runtime]System.Runtime.InteropServices.InAttribute))
-    //              ...
-    //     IL_0037: ret
+	// // Methods
+	// .method family hidebysig virtual 
+	// 	instance void DefineTypeMap (
+	// 		class System.Runtime.InteropServices.TypeMapBuilder2 builder
+	// 	) cil managed 
+	// {
+	// 	// Method begins at RVA 0x27a5
+	// 	// Header size: 1
+	// 	// Code size: 56 (0x38)
+	// 	.maxstack 8
+
+	// 	IL_0000: ldarg.1
+	// 	IL_0001: ldstr "JavaClass0"
+	// 	IL_0006: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder2::AddMapping<class Class0>(string)
+	// 	IL_000b: ldarg.1
+	// 	IL_000c: ldstr "JavaClass1"
+	// 	IL_0011: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder2::AddMapping<class Class1>(string)
+	// 	IL_0016: ldarg.1
+	// 	IL_0017: ldstr "JavaClass2"
+	// 	IL_001c: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder2::AddMapping<class Class2>(string)
+	// 	IL_0021: ldarg.1
+	// 	IL_0022: ldstr "JavaClass3"
+	// 	IL_0027: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder2::AddMapping<class Class3>(string)
+	// 	IL_002c: ldarg.1
+	// 	IL_002d: ldstr "JavaClass4"
+	// 	IL_0032: callvirt instance void System.Runtime.InteropServices.TypeMapBuilder2::AddMapping<class Class4>(string)
+    //           ...
+    //  IL_0037: ret
     // } // end of method JavaInteropFunctionPointerMap::BuildTypeMap
-    protected override void DefineTypeMap()
+    protected override void DefineTypeMap(TypeMapBuilder2 builder)
     {
-        AddMapping<Class0>("JavaClass0");
-        AddMapping<Class1>("JavaClass0");
-        AddMapping<Class2>("JavaClass0");
-        AddMapping<Class3>("JavaClass0");
-        AddMapping<Class4>("JavaClass0");
+        builder.AddMapping<Class0>("JavaClass0");
+        builder.AddMapping<Class1>("JavaClass1");
+        builder.AddMapping<Class2>("JavaClass2");
+        builder.AddMapping<Class3>("JavaClass3");
+        builder.AddMapping<Class4>("JavaClass4");
         // ...
     }
 
@@ -143,26 +140,27 @@ namespace System.Runtime.InteropServices
         {
             Debug.Assert(type.GetMethod(memberName, BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly) is not null);
 
+            DeclaringType = type;
             MemberName = memberName;
         }
 
+        public Type DeclaringType { get; }
         public string MemberName { get; }
     }
 
-    public abstract class TypeMap<TTypeMap, TKey>
-        where TTypeMap : new()
-        where TKey : allows ref struct // allows ReadOnlySpan<byte>
+    public abstract class TypeMap<TKeyKind>
+        where TKeyKind : TypeMapKeyKind
     {
-        protected abstract void DefineTypeMap();
+        protected abstract void DefineTypeMap(TypeMapBuilder2 builder);
+    }
 
-        public static TTypeMap Create()
-        {
-            return new TTypeMap();
-        }
-
-        // This method will be fully trimmed in Release builds
-        protected void AddMapping<T>(string key)
+    public abstract class TypeMapBuilder2
+    {
+        public void AddMapping<T>(string key) // where T : TManagedType -- this won't allow us to use interfaces with static abstract methods as `TManagedType` because of CS8920
         {
         }
     }
+
+    public abstract class TypeMapKeyKind;
+    public sealed class Utf8BytesTypeMapKeyKind : TypeMapKeyKind;
 }

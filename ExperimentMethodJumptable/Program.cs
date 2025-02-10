@@ -123,7 +123,7 @@ void TestJavaInteropTypeMapPrototype()
 
 unsafe void TestJavaInteropFunctionPointerMapPrototype()
 {
-    var map = JavaInteropFunctionPointerMap.Create();
+    var map = new JavaInteropFunctionPointerMap();
     var fnptr = map.MyMethod("JavaClass3"u8);
     var ptr = fnptr(2);
     Console.WriteLine($"JavaClass3.MyMethod(2) = {ptr} (expecting 6)");
