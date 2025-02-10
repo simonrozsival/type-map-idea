@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Hashing;
+using System.Runtime.InteropServices;
+using System.Text;
 
 internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<byte[], int>
 {
+    private readonly GCHandle _pinnedInput;
     private readonly int _itemsCount;
     private readonly int* _hashes;
     private readonly int* _valueOffsets;
@@ -28,14 +31,20 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
     public int this[byte[] key] => IndexOf(key);
 
-    public PrecompiledBinarySearchIndexLookup(byte* data, int length)
+    // data must be pointing to native or pinned memory and that memory needs to be pinned for the whole lifetime of the object
+    // public PrecompiledBinarySearchIndexLookup(byte* data, int length)
+    public PrecompiledBinarySearchIndexLookup(byte[] input)
     {
-        _itemsCount = 0;
-        int remainingLength = length;
+        _pinnedInput = GCHandle.Alloc(input, GCHandleType.Pinned);
+        byte* data = (byte*)_pinnedInput.AddrOfPinnedObject();
 
-        if (length > 0)
+        _itemsCount = 0;
+        int remainingLength = input.Length;
+
+        if (remainingLength > 0)
         {
             _itemsCount = *(int*)data;
+            Console.WriteLine($"Items count: {_itemsCount}");
 
             data = data + sizeof(int);
             remainingLength -= sizeof(int);
@@ -81,7 +90,8 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
     public static PrecompiledInfo Compile(IEnumerable<byte[]> items)
     {
-        var sortedValues = items.OrderBy(e => e, new XxHash3Comparer()).ToArray();
+        // ??? this ordering did not work as expected?
+        var sortedValues = items.OrderBy(e => e, XxHash3Comparer.Instance).ToArray();
 
         List<byte> hashes = new();
         List<byte> valueOffsets = new();
@@ -90,7 +100,9 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
         int offset = 0;
         foreach (var entry in sortedValues)
         {
-            hashes.AddRange(BitConverter.GetBytes(Hash(entry)));
+            Console.WriteLine($"Entry: {Encoding.UTF8.GetString(entry)}, hash: {XxHash3Comparer.Hash(entry)}, offset: {offset}");
+
+            hashes.AddRange(BitConverter.GetBytes(XxHash3Comparer.Hash(entry)));
             valueOffsets.AddRange(BitConverter.GetBytes(offset));
             values.AddRange(entry);
             offset += entry.Length;
@@ -98,7 +110,7 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
         return new PrecompiledInfo
         {
-            Indexes = sortedValues.Select((e, i) => (e, i)).ToDictionary(new XxHash3Comparer()),
+            Indexes = sortedValues.Select((e, i) => (e, i)).ToDictionary(XxHash3Comparer.Instance),
             RawBytes = [
                 ..BitConverter.GetBytes(sortedValues.Length),
                 ..hashes,
@@ -106,6 +118,14 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
                 ..values,
             ],
         };
+    }
+
+    public void Dump()
+    {
+        foreach (var k in Keys)
+        {
+            Console.WriteLine($"{Encoding.UTF8.GetString(k)} => {this[k]}");
+        }
     }
 
     public bool ContainsKey(byte[] key) => IndexOf(key) >= 0;
@@ -119,7 +139,7 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
     // Taken from MemoryExtensions.BinarySearch
     private int IndexOf(ReadOnlySpan<byte> value)
     {
-        int valueHash = Hash(value);
+        int valueHash = XxHash3Comparer.Hash(value);
 
         int lo = 0;
         int hi = _itemsCount - 1;
@@ -134,6 +154,7 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
             //       Saves one subtraction per loop compared to
             //       `int i = lo + ((hi - lo) >> 1);`
             int i = (int)(((uint)hi + (uint)lo) >> 1);
+
 
             int c = CompareTo(value, valueHash, i);
             if (c == 0)
@@ -163,10 +184,6 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
         return hashCmp != 0 ? hashCmp : MemoryExtensions.SequenceCompareTo(value, GetValue(index));
     }
 
-    private static int Hash(ReadOnlySpan<byte> value)
-        => unchecked((int)XxHash3.HashToUInt64(value));
-
-
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public IEnumerator<KeyValuePair<byte[], int>> GetEnumerator()
         => Enumerable.Range(0, _itemsCount).Select(i => new KeyValuePair<byte[], int>(GetValue(i).ToArray(), i)).GetEnumerator();
@@ -176,27 +193,31 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
         public required IReadOnlyDictionary<byte[], int> Indexes { get; init; }
         public required byte[] RawBytes { get; init; }
     }
+}
 
-    // TODO there must be some built-in comparer for this
-    private sealed class XxHash3Comparer : IEqualityComparer<byte[]>, IComparer<byte[]>
+// TODO there must be some built-in comparer for this
+internal sealed class XxHash3Comparer : IEqualityComparer<byte[]>, IEqualityComparer<ReadOnlySpan<byte>>, IComparer<byte[]>
+{
+    public static XxHash3Comparer Instance { get; } = new XxHash3Comparer();
+
+    public bool Equals(byte[]? x, byte[]? y)
     {
-        public bool Equals(byte[]? x, byte[]? y)
-        {
-            if (x is null && y is null) return true;
-            if (x is null || y is null) return false;
-            return x.AsSpan().SequenceEqual(y);
-        }
-
-        public int Compare(byte[]? x, byte[]? y)
-        {
-            if (x is null || y is null) return x is null ? y is null ? 0 : -1 : 1;
-            var xy = Hash(x).CompareTo(Hash(y));
-            return xy != 0 ? xy : MemoryExtensions.SequenceCompareTo(x.AsSpan(), y.AsSpan());
-        }
-
-        public bool Equals(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y) => x.SequenceEqual(y);
-        public int GetHashCode(ReadOnlySpan<byte> obj) => unchecked((int)XxHash3.HashToUInt64(obj));
-        public int GetHashCode(byte[] obj) => unchecked((int)XxHash3.HashToUInt64(obj.AsSpan()));
+        if (x is null && y is null) return true;
+        if (x is null || y is null) return false;
+        return x.AsSpan().SequenceEqual(y);
     }
 
+    public int Compare(byte[]? x, byte[]? y)
+    {
+        System.Diagnostics.Debug.Assert(x is not null && y is not null);
+        var xy = Hash(x).CompareTo(Hash(y));
+        return xy != 0 ? xy : MemoryExtensions.SequenceCompareTo(x.AsSpan(), y.AsSpan());
+    }
+
+    public bool Equals(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y) => x.SequenceEqual(y);
+    public int GetHashCode(ReadOnlySpan<byte> obj) => unchecked((int)XxHash3.HashToUInt64(obj));
+    public int GetHashCode(byte[] obj) => unchecked((int)XxHash3.HashToUInt64(obj.AsSpan()));
+
+    public static int Hash(ReadOnlySpan<byte> value)
+        => unchecked((int)XxHash3.HashToUInt64(value));
 }
