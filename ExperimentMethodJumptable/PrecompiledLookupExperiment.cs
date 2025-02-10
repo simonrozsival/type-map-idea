@@ -44,7 +44,6 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
         if (remainingLength > 0)
         {
             _itemsCount = *(int*)data;
-            Console.WriteLine($"Items count: {_itemsCount}");
 
             data = data + sizeof(int);
             remainingLength -= sizeof(int);

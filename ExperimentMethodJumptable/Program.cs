@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#pragma warning disable CS8321 // The local function '...' is declared but never used
+
 // Idea: Using method bodies to store typerefs and memberrefs for efficient loading of types and method delegates.
 //       We just build a lmethodKeye method(*) which can return any of the types or method delegates and create a jumptable
 //       to jump to exactly to the right place - using a switch statement with cases being sequential numbers.
@@ -18,7 +20,6 @@ using System.Text;
 //
 // Other considerations:
 //   - JITting this lookup method at startup might be an issue - R2R would be very beneficial
-
 
 
 
@@ -40,8 +41,8 @@ void TestHandwrittenMethodMapping()
     var map = new MethodMapping(new byte[0]);
     // var ptr = map.Invoke_CreateInstance("JavaClass33", jthis, transferOptions);
     
-    // we want to call ... JavaClass333.GetFunctionPointer(42); but we know just the Java class name so we have to do...
-    var ptr = map.Invoke_GetFunctionPointer("JavaClass33", 42); 
+    // we want to call ... JavaClass333.MyMethod(42); but we know just the Java class name so we have to do...
+    var ptr = map.Invoke_MyMethod("JavaClass33", 42); 
     Console.WriteLine(ptr); // 3 * 42 = 126
 }
 
@@ -50,7 +51,7 @@ void TestHandwrittenTypeMapping()
     // 1. type map
     var map = new TypeMapping(new byte[0]);
     
-    // we want to call ... JavaClass333.GetFunctionPointer(42); but we know just the Java class name so we have to do...
+    // we want to call ... JavaClass333.MyMethod(42); but we know just the Java class name so we have to do...
     var type = map.GetType("JavaClass33"); 
     Console.WriteLine(type); // "Class33"
 }
@@ -116,16 +117,16 @@ unsafe void TestPrecompiledBinarySearchIndexLookup()
 void TestJavaInteropTypeMapPrototype()
 {
     var map = JavaInteropTypeMap.Create();
-    var ptr = map.GetFunctionPointer("JavaClass3"u8, methodKey: 2);
-    Console.WriteLine($"JavaClass3.GetFunctionPointer(2) = {ptr} (expecting 6)");
+    var ptr = map.MyMethod("JavaClass3"u8, myArgument: 2);
+    Console.WriteLine($"JavaClass3.MyMethod(2) = {ptr} (expecting 6)");
 }
 
 unsafe void TestJavaInteropFunctionPointerMapPrototype()
 {
     var map = JavaInteropFunctionPointerMap.Create();
-    var fnptr = map.GetFunctionPointer("JavaClass3"u8);
+    var fnptr = map.MyMethod("JavaClass3"u8);
     var ptr = fnptr(2);
-    Console.WriteLine($"JavaClass3.GetFunctionPointer(2) = {ptr} (expecting 6)");
+    Console.WriteLine($"JavaClass3.MyMethod(2) = {ptr} (expecting 6)");
 }
 
 class MethodMapping
@@ -198,7 +199,7 @@ class MethodMapping
         
     // }
 
-    public IntPtr Invoke_GetFunctionPointer(string javaClassName, int vtableSlot)
+    public IntPtr Invoke_MyMethod(string javaClassName, int vtableSlot)
     {
         // Could this method get too big to jit? --- https://github.com/xamarin/xamarin-macios/blob/main/docs/managed-static-registrar.md#method-mapping
         // how could we represent this method as a hash table?
@@ -220,17 +221,17 @@ class MethodMapping
         // IL_00d6: br IL_02a0
         //
         // IL_00db: ldmethodKey.2monodroid_typemap_java_to_managed
-        // IL_00dc: call native int JavaClass0::GetFunctionPointer(int32)
+        // IL_00dc: call native int JavaClass0::MyMethod(int32)
         // IL_00e1: stloc.2
         // IL_00e2: br IL_02ab
         //
         // IL_00e7: ldmethodKey.2
-        // IL_00e8: call native int JavaClass1::GetFunctionPointer(int32)
+        // IL_00e8: call native int JavaClass1::MyMethod(int32)
         // IL_00ed: stloc.2
         // IL_00ee: br IL_02ab
         //
         // IL_00f3: ldmethodKey.2
-        // IL_00f4: call native int JavaClass2::GetFunctionPointer(int32)
+        // IL_00f4: call native int JavaClass2::MyMethod(int32)
         // IL_00f9: stloc.2
         // IL_00fa: br IL_02ab
         //
@@ -240,48 +241,48 @@ class MethodMapping
         {
             // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
             // how do I test that?
-            0 => Class0.GetFunctionPointer(vtableSlot),
-            1 => Class1.GetFunctionPointer(vtableSlot),
-            2 => Class2.GetFunctionPointer(vtableSlot),
-            3 => Class3.GetFunctionPointer(vtableSlot),
-            4 => Class4.GetFunctionPointer(vtableSlot),
-            5 => Class5.GetFunctionPointer(vtableSlot),
-            6 => Class6.GetFunctionPointer(vtableSlot),
-            7 => Class7.GetFunctionPointer(vtableSlot),
-            8 => Class8.GetFunctionPointer(vtableSlot),
-            9 => Class9.GetFunctionPointer(vtableSlot),
-            10 => Class10.GetFunctionPointer(vtableSlot),
-            11 => Class11.GetFunctionPointer(vtableSlot),
-            12 => Class12.GetFunctionPointer(vtableSlot),
-            13 => Class13.GetFunctionPointer(vtableSlot),
-            14 => Class14.GetFunctionPointer(vtableSlot),
-            15 => Class15.GetFunctionPointer(vtableSlot),
-            16 => Class16.GetFunctionPointer(vtableSlot),
-            17 => Class17.GetFunctionPointer(vtableSlot),
-            18 => Class18.GetFunctionPointer(vtableSlot),
-            19 => Class19.GetFunctionPointer(vtableSlot),
-            20 => Class20.GetFunctionPointer(vtableSlot),
-            21 => Class21.GetFunctionPointer(vtableSlot),
-            22 => Class22.GetFunctionPointer(vtableSlot),
-            23 => Class23.GetFunctionPointer(vtableSlot),
-            24 => Class24.GetFunctionPointer(vtableSlot),
-            25 => Class25.GetFunctionPointer(vtableSlot),
-            26 => Class26.GetFunctionPointer(vtableSlot),
-            27 => Class27.GetFunctionPointer(vtableSlot),
-            28 => Class28.GetFunctionPointer(vtableSlot),
-            29 => Class29.GetFunctionPointer(vtableSlot),
-            30 => Class30.GetFunctionPointer(vtableSlot),
-            31 => Class31.GetFunctionPointer(vtableSlot),
-            32 => Class32.GetFunctionPointer(vtableSlot),
-            33 => Class33.GetFunctionPointer(vtableSlot),
-            34 => Class34.GetFunctionPointer(vtableSlot),
-            35 => Class35.GetFunctionPointer(vtableSlot),
-            36 => Class36.GetFunctionPointer(vtableSlot),
-            37 => Class37.GetFunctionPointer(vtableSlot),
-            38 => Class38.GetFunctionPointer(vtableSlot),
-            39 => Class39.GetFunctionPointer(vtableSlot),
-            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherClass1.GetFunctionPointer(methodKey), // --- second assembly module initializer ran!
-            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_GetFunctionPointer(vtableSlot), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
+            0 => Class0.MyMethod(vtableSlot),
+            1 => Class1.MyMethod(vtableSlot),
+            2 => Class2.MyMethod(vtableSlot),
+            3 => Class3.MyMethod(vtableSlot),
+            4 => Class4.MyMethod(vtableSlot),
+            5 => Class5.MyMethod(vtableSlot),
+            6 => Class6.MyMethod(vtableSlot),
+            7 => Class7.MyMethod(vtableSlot),
+            8 => Class8.MyMethod(vtableSlot),
+            9 => Class9.MyMethod(vtableSlot),
+            10 => Class10.MyMethod(vtableSlot),
+            11 => Class11.MyMethod(vtableSlot),
+            12 => Class12.MyMethod(vtableSlot),
+            13 => Class13.MyMethod(vtableSlot),
+            14 => Class14.MyMethod(vtableSlot),
+            15 => Class15.MyMethod(vtableSlot),
+            16 => Class16.MyMethod(vtableSlot),
+            17 => Class17.MyMethod(vtableSlot),
+            18 => Class18.MyMethod(vtableSlot),
+            19 => Class19.MyMethod(vtableSlot),
+            20 => Class20.MyMethod(vtableSlot),
+            21 => Class21.MyMethod(vtableSlot),
+            22 => Class22.MyMethod(vtableSlot),
+            23 => Class23.MyMethod(vtableSlot),
+            24 => Class24.MyMethod(vtableSlot),
+            25 => Class25.MyMethod(vtableSlot),
+            26 => Class26.MyMethod(vtableSlot),
+            27 => Class27.MyMethod(vtableSlot),
+            28 => Class28.MyMethod(vtableSlot),
+            29 => Class29.MyMethod(vtableSlot),
+            30 => Class30.MyMethod(vtableSlot),
+            31 => Class31.MyMethod(vtableSlot),
+            32 => Class32.MyMethod(vtableSlot),
+            33 => Class33.MyMethod(vtableSlot),
+            34 => Class34.MyMethod(vtableSlot),
+            35 => Class35.MyMethod(vtableSlot),
+            36 => Class36.MyMethod(vtableSlot),
+            37 => Class37.MyMethod(vtableSlot),
+            38 => Class38.MyMethod(vtableSlot),
+            39 => Class39.MyMethod(vtableSlot),
+            // 40 => ExperimentMethodJumptable_SecondAssembly.OtherClass1.MyMethod(myArgument), // --- second assembly module initializer ran!
+            40 => Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_MyMethod(vtableSlot), // --- second assembly module initializer didn't run! (with R2R it does, is it a problem though?)
             _ => throw new ArgumentOutOfRangeException(nameof(index))
         };
 
@@ -291,53 +292,53 @@ class MethodMapping
         // {
         //     // when this method is jitted, will it cause all the types to be loaded? or are those just `ldftn <memberref>` instructions that won't cause the type to load?
         //     // how do I test that?
-        //     0000 => JavaClass0.GetFunctionPointer,
-        //     // 1000 => JavaClass1.GetFunctionPointer,
-        //     // 2000 => JavaClass2.GetFunctionPointer,
-        //     3000 => JavaClass3.GetFunctionPointer,
-        //     4000 => JavaClass4.GetFunctionPointer,
-        //     // 5000 => JavaClass5.GetFunctionPointer,
-        //     // 6000 => JavaClass6.GetFunctionPointer,
-        //     7000 => JavaClass7.GetFunctionPointer,
-        //     8000 => JavaClass8.GetFunctionPointer,
-        //     // 9000 => JavaClass9.GetFunctionPointer,
-        //     10000 => JavaClass10.GetFunctionPointer,
-        //     11000 => JavaClass11.GetFunctionPointer,
-        //     12000 => JavaClass12.GetFunctionPointer,
-        //     // 13000 => JavaClass13.GetFunctionPointer,
-        //     // 14000 => JavaClass14.GetFunctionPointer,
-        //     15000 => JavaClass15.GetFunctionPointer,
-        //     16000 => JavaClass16.GetFunctionPointer,
-        //     17000 => JavaClass17.GetFunctionPointer,
-        //     // 18000 => JavaClass18.GetFunctionPointer,
-        //     // 19000 => JavaClass19.GetFunctionPointer,
-        //     // 20000 => JavaClass20.GetFunctionPointer,
-        //     // 21000 => JavaClass21.GetFunctionPointer,
-        //     // 22000 => JavaClass22.GetFunctionPointer,
-        //     // 23000 => JavaClass23.GetFunctionPointer,
-        //     // 24000 => JavaClass24.GetFunctionPointer,
-        //     // 25000 => JavaClass25.GetFunctionPointer,
-        //     // 26000 => JavaClass26.GetFunctionPointer,
-        //     27000 => JavaClass27.GetFunctionPointer,
-        //     28000 => JavaClass28.GetFunctionPointer,
-        //     // 29000 => JavaClass29.GetFunctionPointer,
-        //     // 30000 => JavaClass30.GetFunctionPointer,
-        //     // 31000 => JavaClass31.GetFunctionPointer,
-        //     // 32000 => JavaClass32.GetFunctionPointer,
-        //     33000 => JavaClass33.GetFunctionPointer,
-        //     // 34000 => JavaClass34.GetFunctionPointer,
-        //     // 35000 => JavaClass35.GetFunctionPointer,
-        //     // 36000 => JavaClass36.GetFunctionPointer,
-        //     // 37000 => JavaClass37.GetFunctionPointer,
-        //     // 38000 => JavaClass38.GetFunctionPointer,
-        //     39000 => JavaClass39.GetFunctionPointer,
+        //     0000 => JavaClass0.MyMethod,
+        //     // 1000 => JavaClass1.MyMethod,
+        //     // 2000 => JavaClass2.MyMethod,
+        //     3000 => JavaClass3.MyMethod,
+        //     4000 => JavaClass4.MyMethod,
+        //     // 5000 => JavaClass5.MyMethod,
+        //     // 6000 => JavaClass6.MyMethod,
+        //     7000 => JavaClass7.MyMethod,
+        //     8000 => JavaClass8.MyMethod,
+        //     // 9000 => JavaClass9.MyMethod,
+        //     10000 => JavaClass10.MyMethod,
+        //     11000 => JavaClass11.MyMethod,
+        //     12000 => JavaClass12.MyMethod,
+        //     // 13000 => JavaClass13.MyMethod,
+        //     // 14000 => JavaClass14.MyMethod,
+        //     15000 => JavaClass15.MyMethod,
+        //     16000 => JavaClass16.MyMethod,
+        //     17000 => JavaClass17.MyMethod,
+        //     // 18000 => JavaClass18.MyMethod,
+        //     // 19000 => JavaClass19.MyMethod,
+        //     // 20000 => JavaClass20.MyMethod,
+        //     // 21000 => JavaClass21.MyMethod,
+        //     // 22000 => JavaClass22.MyMethod,
+        //     // 23000 => JavaClass23.MyMethod,
+        //     // 24000 => JavaClass24.MyMethod,
+        //     // 25000 => JavaClass25.MyMethod,
+        //     // 26000 => JavaClass26.MyMethod,
+        //     27000 => JavaClass27.MyMethod,
+        //     28000 => JavaClass28.MyMethod,
+        //     // 29000 => JavaClass29.MyMethod,
+        //     // 30000 => JavaClass30.MyMethod,
+        //     // 31000 => JavaClass31.MyMethod,
+        //     // 32000 => JavaClass32.MyMethod,
+        //     33000 => JavaClass33.MyMethod,
+        //     // 34000 => JavaClass34.MyMethod,
+        //     // 35000 => JavaClass35.MyMethod,
+        //     // 36000 => JavaClass36.MyMethod,
+        //     // 37000 => JavaClass37.MyMethod,
+        //     // 38000 => JavaClass38.MyMethod,
+        //     39000 => JavaClass39.MyMethod,
         //     _ => throw new ArgumentOutOfRangeException(nameof(index))
         // };
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)] // -- this is necessary for R2R to skip loading the other assembly unless the type is actually requested
-    private static IntPtr Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_GetFunctionPointer(int methodKey)
-        => ExperimentMethodJumptable_SecondAssembly.OtherClass1.GetFunctionPointer(methodKey);
+    private static IntPtr Get_ExperimentMethodJumptable_SecondAssembly_OtherClass1_MyMethod(int myArgument)
+        => ExperimentMethodJumptable_SecondAssembly.OtherClass1.MyMethod(myArgument);
 }
 
 class TypeMapping
@@ -487,28 +488,28 @@ class TypeMapping
 
 public interface IJavaInteropFunctionPointerResolver
 {
-    static abstract IntPtr GetFunctionPointer(int methodKey);
+    static abstract IntPtr MyMethod(int myArgument);
 }
 
 public partial class Class0 : IJavaInteropFunctionPointerResolver
 {
     static Class0() => Console.WriteLine("Class0 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 0;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 0;
 }
 
 public partial class Class1 : IJavaInteropFunctionPointerResolver
 {
     static Class1() => Console.WriteLine("Class1 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 1;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 1;
 }
 
 public partial class Class2 : IJavaInteropFunctionPointerResolver
 {
     static Class2() => Console.WriteLine("Class2 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 2;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 2;
     
-    // public static IntPtr GetFunctionPointer(int methodKey)
-    //     => methodKey switch
+    // public static IntPtr MyMethod(int myArgument)
+    //     => myArgument switch
     //     {
     //         0 => (IntPtr)(delegate* unmanageD<...)&A,
     //     }
@@ -517,222 +518,222 @@ public partial class Class2 : IJavaInteropFunctionPointerResolver
 public partial class Class3 : IJavaInteropFunctionPointerResolver
 {
     static Class3() => Console.WriteLine("Class3 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 3;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 3;
 }
 
 public partial class Class4 : IJavaInteropFunctionPointerResolver
 {
     static Class4() => Console.WriteLine("Class4 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 4;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 4;
 }
 
 public partial class Class5 : IJavaInteropFunctionPointerResolver
 {
     static Class5() => Console.WriteLine("Class5 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 5;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 5;
 }
 
 public partial class Class6 : IJavaInteropFunctionPointerResolver
 {
     static Class6() => Console.WriteLine("Class6 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 6;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 6;
 }
 
 public partial class Class7 : IJavaInteropFunctionPointerResolver
 {
     static Class7() => Console.WriteLine("Class7 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 7;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 7;
 }
 
 public partial class Class8 : IJavaInteropFunctionPointerResolver
 {
     static Class8() => Console.WriteLine("Class8 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 8;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 8;
 }
 
 public partial class Class9 : IJavaInteropFunctionPointerResolver
 {
     static Class9() => Console.WriteLine("Class9 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 9;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 9;
 }
 
 
 public partial class Class10 : IJavaInteropFunctionPointerResolver
 {
     static Class10() => Console.WriteLine("Class10 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 0;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 0;
 }
 
 public partial class Class11 : IJavaInteropFunctionPointerResolver
 {
     static Class11() => Console.WriteLine("Class11 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 1;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 1;
 }
 
 public partial class Class12 : IJavaInteropFunctionPointerResolver
 {
     static Class12() => Console.WriteLine("Class12 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 2;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 2;
 }
 
 public partial class Class13 : IJavaInteropFunctionPointerResolver
 {
     static Class13() => Console.WriteLine("Class13 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 3;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 3;
 }
 
 public partial class Class14 : IJavaInteropFunctionPointerResolver
 {
     static Class14() => Console.WriteLine("Class14 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 4;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 4;
 }
 
 public partial class Class15 : IJavaInteropFunctionPointerResolver
 {
     static Class15() => Console.WriteLine("Class15 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 5;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 5;
 }
 
 public partial class Class16 : IJavaInteropFunctionPointerResolver
 {
     static Class16() => Console.WriteLine("Class16 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 6;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 6;
 }
 
 public partial class Class17 : IJavaInteropFunctionPointerResolver
 {
     static Class17() => Console.WriteLine("Class17 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 7;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 7;
 }
 
 public partial class Class18 : IJavaInteropFunctionPointerResolver
 {
     static Class18() => Console.WriteLine("Class18 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 8;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 8;
 }
 
 public partial class Class19 : IJavaInteropFunctionPointerResolver
 {
     static Class19() => Console.WriteLine("Class19 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 9;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 9;
 }
 
 public partial class Class20 : IJavaInteropFunctionPointerResolver
 {
     static Class20() => Console.WriteLine("Class20 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 0;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 0;
 }
 
 public partial class Class21 : IJavaInteropFunctionPointerResolver
 {
     static Class21() => Console.WriteLine("Class21 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 1;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 1;
 }
 
 public partial class Class22 : IJavaInteropFunctionPointerResolver
 {
     static Class22() => Console.WriteLine("Class22 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 2;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 2;
 }
 
 public partial class Class23 : IJavaInteropFunctionPointerResolver
 {
     static Class23() => Console.WriteLine("Class23 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 3;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 3;
 }
 
 public partial class Class24 : IJavaInteropFunctionPointerResolver
 {
     static Class24() => Console.WriteLine("Class24 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 4;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 4;
 }
 
 public partial class Class25 : IJavaInteropFunctionPointerResolver
 {
     static Class25() => Console.WriteLine("Class25 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 5;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 5;
 }
 
 public partial class Class26 : IJavaInteropFunctionPointerResolver
 {
     static Class26() => Console.WriteLine("Class26 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 6;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 6;
 }
 
 public partial class Class27 : IJavaInteropFunctionPointerResolver
 {
     static Class27() => Console.WriteLine("Class27 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 7;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 7;
 }
 
 public partial class Class28 : IJavaInteropFunctionPointerResolver
 {
     static Class28() => Console.WriteLine("Class28 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 8;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 8;
 }
 
 public partial class Class29 : IJavaInteropFunctionPointerResolver
 {
     static Class29() => Console.WriteLine("Class29 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 9;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 9;
 }
 
 public partial class Class30 : IJavaInteropFunctionPointerResolver
 {
     static Class30() => Console.WriteLine("Class30 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 0;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 0;
 }
 
 public partial class Class31 : IJavaInteropFunctionPointerResolver
 {
     static Class31() => Console.WriteLine("Class31 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 1;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 1;
 }
 
 public partial class Class32 : IJavaInteropFunctionPointerResolver
 {
     static Class32() => Console.WriteLine("Class32 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 2;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 2;
 }
 
 public partial class Class33 : IJavaInteropFunctionPointerResolver
 {
     static Class33() => Console.WriteLine("Class33 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 3;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 3;
 }
 
 public partial class Class34 : IJavaInteropFunctionPointerResolver
 {
     static Class34() => Console.WriteLine("Class34 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 4;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 4;
 }
 
 public partial class Class35 : IJavaInteropFunctionPointerResolver
 {
     static Class35() => Console.WriteLine("Class35 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 5;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 5;
 }
 
 public partial class Class36 : IJavaInteropFunctionPointerResolver
 {
     static Class36() => Console.WriteLine("Class36 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 6;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 6;
 }
 
 public partial class Class37 : IJavaInteropFunctionPointerResolver
 {
     static Class37() => Console.WriteLine("Class37 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 7;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 7;
 }
 
 public partial class Class38 : IJavaInteropFunctionPointerResolver
 {
     static Class38() => Console.WriteLine("Class38 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 8;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 8;
 }
 
 public partial class Class39 : IJavaInteropFunctionPointerResolver
 {
     static Class39() => Console.WriteLine("Class39 static ctor");
-    public static IntPtr GetFunctionPointer(int methodKey) => methodKey * 9;
+    public static IntPtr MyMethod(int myArgument) => myArgument * 9;
 }
