@@ -26,8 +26,8 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
     public int Count => _itemsCount;
 
-    public IEnumerable<byte[]> Keys => Values.Select(i => GetValue(i).ToArray());
-    public IEnumerable<int> Values => Enumerable.Range(0, _itemsCount);
+    IEnumerable<byte[]> IReadOnlyDictionary<byte[], int>.Keys => Enumerable.Range(0, _itemsCount).Select(i => GetValue(i).ToArray());
+    IEnumerable<int> IReadOnlyDictionary<byte[], int>.Values => Enumerable.Range(0, _itemsCount);
 
     public int this[byte[] key] => IndexOf(key);
 
@@ -120,9 +120,9 @@ internal unsafe class PrecompiledBinarySearchIndexLookup : IReadOnlyDictionary<b
 
     public void Dump()
     {
-        foreach (var k in Keys)
+        for (int i = 0; i < _itemsCount; i++)
         {
-            Console.WriteLine($"{Encoding.UTF8.GetString(k)} => {this[k]}");
+            Console.WriteLine($"{GetValue(i).ToArray()} ({Hashes[i]}) => {i}");
         }
     }
 
